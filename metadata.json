@@ -1,0 +1,6 @@
+{
+  "name": "VibeNexa — Find Your Partner",
+  "description": "Production-oriented Android-first social and dating platform with age-safe discovery, real-time global and personal chat, verification, manual UPI payments, and private in-app Super Admin controls.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

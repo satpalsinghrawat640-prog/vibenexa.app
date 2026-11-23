@@ -1,0 +1,11 @@
+{
+  "name": "VibeNexa — Find Your Partner",
+  "short_name": "VibeNexa",
+  "description": "Find Your Partner — Modern Android-first social and dating platform.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF9FA",
+  "theme_color": "#E11D48",
+  "categories": ["social", "lifestyle"]
+}

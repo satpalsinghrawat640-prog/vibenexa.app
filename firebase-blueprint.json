@@ -1,0 +1,374 @@
+{
+  "entities": {
+    "UserAccount": {
+      "title": "UserAccount",
+      "description": "Private user account record containing PII, auth identifiers, moderation status, and trusted system flags.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "username": { "type": "string", "minLength": 3, "maxLength": 30, "pattern": "^[a-zA-Z0-9_]+$" },
+        "email": { "type": "string", "format": "email", "maxLength": 120 },
+        "mobile": { "type": "string", "maxLength": 20 },
+        "role": { "type": "string", "enum": ["USER", "SUPER_ADMIN"] },
+        "ageGroup": { "type": "string", "enum": ["adult", "minor"] },
+        "dob": { "type": "string", "maxLength": 10 },
+        "isVerified": { "type": "boolean" },
+        "isMuted": { "type": "boolean" },
+        "isSuspended": { "type": "boolean" },
+        "isDeleted": { "type": "boolean" },
+        "subscriptionPlanId": { "type": "string", "maxLength": 64 },
+        "subscriptionExpiresAt": { "type": "string", "maxLength": 40 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "username", "role", "ageGroup", "isVerified", "isMuted", "isSuspended", "createdAt"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Publicly discoverable non-PII user profile with age-group separation and customizable theme color.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "username": { "type": "string", "minLength": 3, "maxLength": 30 },
+        "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "age": { "type": "number" },
+        "ageGroup": { "type": "string", "enum": ["adult", "minor"] },
+        "gender": { "type": "string", "enum": ["Male", "Female", "Prefer not to say"] },
+        "partnerPreference": { "type": "string", "enum": ["Male", "Female", "Everyone"] },
+        "state": { "type": "string", "maxLength": 80 },
+        "district": { "type": "string", "maxLength": 80 },
+        "bio": { "type": "string", "maxLength": 500 },
+        "photoUrl": { "type": "string", "maxLength": 500 },
+        "profileColor": { "type": "string", "maxLength": 32 },
+        "isVerified": { "type": "boolean" },
+        "isSuspended": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "username", "name", "age", "ageGroup", "gender", "partnerPreference", "state", "district", "bio", "profileColor", "isVerified", "createdAt"]
+    },
+    "Post": {
+      "title": "Post",
+      "description": "Social Home Feed post authored by a genuine user.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "authorUid": { "type": "string", "maxLength": 128 },
+        "ageGroup": { "type": "string", "enum": ["adult", "minor"] },
+        "caption": { "type": "string", "maxLength": 1000 },
+        "imageUrl": { "type": "string", "maxLength": 500 },
+        "likesCount": { "type": "number" },
+        "commentsCount": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "authorUid", "ageGroup", "caption", "likesCount", "commentsCount", "createdAt"]
+    },
+    "LikeRecord": {
+      "title": "LikeRecord",
+      "description": "Adult-only profile like interaction.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "fromUid": { "type": "string", "maxLength": 128 },
+        "toUid": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "fromUid", "toUid", "createdAt"]
+    },
+    "MatchRecord": {
+      "title": "MatchRecord",
+      "description": "Mutual adult match created when two eligible 18+ users like each other.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userA": { "type": "string", "maxLength": 128 },
+        "userB": { "type": "string", "maxLength": 128 },
+        "chatId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userA", "userB", "chatId", "createdAt"]
+    },
+    "ChatRoom": {
+      "title": "ChatRoom",
+      "description": "Private 1-to-1 chat room between two matched adult users.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userA": { "type": "string", "maxLength": 128 },
+        "userB": { "type": "string", "maxLength": 128 },
+        "lastMessageText": { "type": "string", "maxLength": 500 },
+        "lastMessageAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userA", "userB", "createdAt"]
+    },
+    "DirectMessage": {
+      "title": "DirectMessage",
+      "description": "Message in a private 1-to-1 chat with sent/delivered/seen statuses.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "chatId": { "type": "string", "maxLength": 128 },
+        "senderUid": { "type": "string", "maxLength": 128 },
+        "recipientUid": { "type": "string", "maxLength": 128 },
+        "text": { "type": "string", "maxLength": 2000 },
+        "replyToId": { "type": "string", "maxLength": 128 },
+        "status": { "type": "string", "enum": ["sent", "delivered", "seen"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "chatId", "senderUid", "recipientUid", "text", "status", "createdAt"]
+    },
+    "GlobalMessage": {
+      "title": "GlobalMessage",
+      "description": "Message in age-segregated Global Chat (adult or minor room).",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "room": { "type": "string", "enum": ["adult", "minor"] },
+        "senderUid": { "type": "string", "maxLength": 128 },
+        "text": { "type": "string", "maxLength": 1000 },
+        "mediaUrl": { "type": "string", "maxLength": 500 },
+        "replyToId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "room", "senderUid", "text", "createdAt"]
+    },
+    "NotificationItem": {
+      "title": "NotificationItem",
+      "description": "User notification for real likes, matches, messages, or admin announcements.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "type": { "type": "string", "enum": ["match", "message", "like", "announcement", "system"] },
+        "title": { "type": "string", "maxLength": 120 },
+        "body": { "type": "string", "maxLength": 400 },
+        "isRead": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "type", "title", "body", "isRead", "createdAt"]
+    },
+    "SubscriptionRecord": {
+      "title": "SubscriptionRecord",
+      "description": "Trusted user subscription state modified exclusively by backend/Super Admin.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "planId": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["active", "expired", "revoked"] },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "planId", "status", "startedAt", "expiresAt"]
+    },
+    "PaymentRequest": {
+      "title": "PaymentRequest",
+      "description": "Manual UPI payment submission requiring Admin transaction verification.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "productId": { "type": "string", "maxLength": 64 },
+        "productType": { "type": "string", "enum": ["subscription", "mute_appeal"] },
+        "amount": { "type": "number" },
+        "transactionRef": { "type": "string", "minLength": 4, "maxLength": 80 },
+        "screenshotUrl": { "type": "string", "maxLength": 500 },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected", "refunded"] },
+        "adminNote": { "type": "string", "maxLength": 400 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "productId", "productType", "amount", "transactionRef", "status", "createdAt"]
+    },
+    "MuteAppeal": {
+      "title": "MuteAppeal",
+      "description": "₹19 mute appeal request reviewed by Super Admin.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "reason": { "type": "string", "maxLength": 1000 },
+        "paymentRequestId": { "type": "string", "maxLength": 128 },
+        "status": { "type": "string", "enum": ["pending", "under_review", "approved", "rejected"] },
+        "refundStatus": { "type": "string", "enum": ["none", "refunded", "non_refundable"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "reason", "status", "refundStatus", "createdAt"]
+    },
+    "SafetyReport": {
+      "title": "SafetyReport",
+      "description": "Free user safety report filed in the Report Center.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "reporterUid": { "type": "string", "maxLength": 128 },
+        "targetUid": { "type": "string", "maxLength": 128 },
+        "category": { "type": "string", "maxLength": 64 },
+        "details": { "type": "string", "maxLength": 1500 },
+        "screenshotUrl": { "type": "string", "maxLength": 500 },
+        "status": { "type": "string", "enum": ["pending", "under_review", "resolved", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "reporterUid", "targetUid", "category", "details", "status", "createdAt"]
+    },
+    "VerificationRequest": {
+      "title": "VerificationRequest",
+      "description": "Privacy-preserving profile verification request.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "challengeCode": { "type": "string", "maxLength": 32 },
+        "proofMediaId": { "type": "string", "maxLength": 128 },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "rejectionReason": { "type": "string", "maxLength": 400 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "challengeCode", "status", "createdAt"]
+    },
+    "SupportTicket": {
+      "title": "SupportTicket",
+      "description": "Free Help & Support ticket submitted by a user.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "category": { "type": "string", "maxLength": 64 },
+        "subject": { "type": "string", "maxLength": 140 },
+        "message": { "type": "string", "maxLength": 2000 },
+        "status": { "type": "string", "enum": ["pending", "under_review", "resolved", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "category", "subject", "message", "status", "createdAt"]
+    },
+    "BlockedUser": {
+      "title": "BlockedUser",
+      "description": "Block relationship between two users.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "blockerUid": { "type": "string", "maxLength": 128 },
+        "blockedUid": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "blockerUid", "blockedUid", "createdAt"]
+    },
+    "MutedUser": {
+      "title": "MutedUser",
+      "description": "Active moderation mute record controlled only by Super Admin.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "reason": { "type": "string", "maxLength": 400 },
+        "mutedBy": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "reason", "mutedBy", "createdAt"]
+    },
+    "AdminLog": {
+      "title": "AdminLog",
+      "description": "Immutable audit log entry for every sensitive Admin action.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "adminUid": { "type": "string", "maxLength": 128 },
+        "action": { "type": "string", "maxLength": 120 },
+        "targetId": { "type": "string", "maxLength": 128 },
+        "details": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "adminUid", "action", "targetId", "details", "createdAt"]
+    },
+    "AppSettings": {
+      "title": "AppSettings",
+      "description": "Admin-configurable subscription tiers, UPI payment details, and platform parameters.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "freeGlobalDailyLimit": { "type": "number" },
+        "muteAppealPrice": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "freeGlobalDailyLimit", "muteAppealPrice", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserAccount" },
+      "description": "Private user account PII & security flags; owner or Super Admin read-only for sensitive flags."
+    },
+    "/profiles/{profileId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Public profile records partitioned by adult/minor ageGroup."
+    },
+    "/posts/{postId}": {
+      "schema": { "$ref": "#/entities/Post" },
+      "description": "Home feed posts."
+    },
+    "/likes/{likeId}": {
+      "schema": { "$ref": "#/entities/LikeRecord" },
+      "description": "Adult profile likes."
+    },
+    "/matches/{matchId}": {
+      "schema": { "$ref": "#/entities/MatchRecord" },
+      "description": "Mutual adult matches."
+    },
+    "/chats/{chatId}": {
+      "schema": { "$ref": "#/entities/ChatRoom" },
+      "description": "Private 1-to-1 chat room metadata."
+    },
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": { "$ref": "#/entities/DirectMessage" },
+      "description": "Private 1-to-1 chat messages."
+    },
+    "/global_messages/{messageId}": {
+      "schema": { "$ref": "#/entities/GlobalMessage" },
+      "description": "Age-segregated Global Chat messages."
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/NotificationItem" },
+      "description": "Per-user notifications."
+    },
+    "/subscriptions/{subscriptionId}": {
+      "schema": { "$ref": "#/entities/SubscriptionRecord" },
+      "description": "Trusted subscription records."
+    },
+    "/payment_requests/{paymentId}": {
+      "schema": { "$ref": "#/entities/PaymentRequest" },
+      "description": "Manual UPI payment requests."
+    },
+    "/appeals/{appealId}": {
+      "schema": { "$ref": "#/entities/MuteAppeal" },
+      "description": "Mute appeal records."
+    },
+    "/reports/{reportId}": {
+      "schema": { "$ref": "#/entities/SafetyReport" },
+      "description": "User safety reports."
+    },
+    "/verification_requests/{requestId}": {
+      "schema": { "$ref": "#/entities/VerificationRequest" },
+      "description": "Profile verification requests."
+    },
+    "/support_tickets/{ticketId}": {
+      "schema": { "$ref": "#/entities/SupportTicket" },
+      "description": "Help and support tickets."
+    },
+    "/blocked_users/{blockId}": {
+      "schema": { "$ref": "#/entities/BlockedUser" },
+      "description": "User block relationships."
+    },
+    "/muted_users/{muteId}": {
+      "schema": { "$ref": "#/entities/MutedUser" },
+      "description": "Admin moderation mutes."
+    },
+    "/admin_logs/{logId}": {
+      "schema": { "$ref": "#/entities/AdminLog" },
+      "description": "Immutable Super Admin audit logs."
+    },
+    "/app_settings/{settingId}": {
+      "schema": { "$ref": "#/entities/AppSettings" },
+      "description": "Platform settings, UPI options, and subscription plan configurations."
+    }
+  }
+}

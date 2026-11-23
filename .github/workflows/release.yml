@@ -1,0 +1,74 @@
+name: Create VibeNexa Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release version tag (e.g. v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Type-check codebase
+        run: npm run lint
+
+      - name: Build production web bundle
+        run: npm run build
+
+      - name: Package release archive
+        env:
+          INPUT_TAG: ${{ inputs.tag_name }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          TAG="${INPUT_TAG:-$REF_NAME}"
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "Invalid tag format: $TAG (expected e.g. v1.0.0)"
+            exit 1
+          fi
+          echo "RELEASE_TAG=$TAG" >> "$GITHUB_ENV"
+          mkdir -p release-bundle
+          cp -r dist server server.ts package.json tsconfig.json vite.config.ts firestore.rules storage.rules firebase-blueprint.json .env.example README.md public release-bundle/
+          cd release-bundle
+          zip -r "../vibenexa-${TAG}.zip" .
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: VibeNexa ${{ env.RELEASE_TAG }}
+          generate_release_notes: true
+          files: |
+            vibenexa-${{ env.RELEASE_TAG }}.zip
+            firestore.rules
+            storage.rules
+          body: |
+            ## VibeNexa — Find Your Partner (${{ env.RELEASE_TAG }})
+
+            - Custom Username / Email / Mobile + Password authentication (`scrypt` hashing, no Google Login, no OTP)
+            - Strict 18+ adult / minor age-safety separation across Discover, Likes, Matches, Feed & Chat
+            - Real-time Global Chat (15 msgs / 24h free quota) & 1-to-1 Personal Chat (typing, Sent/Delivered/Seen, Premium Chat Wallpaper)
+            - Profile Verification (blue tick), 3 Admin-configurable subscription tiers, Manual UPI & QR configuration, ₹19 Mute Appeal, free Report Center & Help/Support
+            - Private In-App Super Admin Dashboard inside Settings
+            - Hardened `firestore.rules` & `storage.rules` attached
